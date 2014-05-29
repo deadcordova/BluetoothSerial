@@ -1,13 +1,13 @@
 # Bluetooth Serial Plugin for PhoneGap
 
-This plugin enables serial communication over Bluetooth. It was written for communicating between Android or iOS and an Arduino.
+This plugin enables serial communication over Bluetooth. It was written for communicating between Android or with an Arduino (HC-06 Bluetooth Shield).
 
-Android uses Classic Bluetooth.  iOS uses Bluetooth Low Energy.
+Android uses Classic Bluetooth.  #iOS uses Bluetooth Low Energy.
 
 ## Supported Platforms
 
 * Android
-* iOS with [BLEMini](http://redbearlab.com/blemini), [BLEShield](http://redbearlab.com/bleshield/) or [Adafruit Bluefruit LE](http://www.adafruit.com/products/1697)
+#* iOS with [BLEMini](http://redbearlab.com/blemini), [BLEShield](http://redbearlab.com/bleshield/) or [Adafruit Bluefruit LE](http://www.adafruit.com/products/1697)
  
 [Supporting other Bluetooth Low Energy hardware](#supporting-other-ble-hardware)
 
@@ -15,7 +15,7 @@ Android uses Classic Bluetooth.  iOS uses Bluetooth Low Energy.
 
  * The phone must initiate the Bluetooth connection
  * Data sent over the connection is assumed to be Strings
- * iOS Bluetooth Low Energy requires iPhone 4S, iPhone5, iPod 5, or iPad3+
+ #* iOS Bluetooth Low Energy requires iPhone 4S, iPhone5, iPod 5, or iPad3+
 
 # Installing 
 
@@ -44,6 +44,7 @@ There are some [sample projects](https://github.com/don/BluetoothSerial/tree/mas
 - [bluetoothSerial.unsubscribe](#unsubscribe)
 - [bluetoothSerial.clear](#clear)
 - [bluetoothSerial.list](#list)
+- [bluetoothSerial.scan] (#scan)
 - [bluetoothSerial.isEnabled](#isenabled)
 - [bluetoothSerial.isConnected](#isconnected)
 - [bluetoothSerial.readRSSI](#readrssi)
@@ -299,7 +300,49 @@ The advertised RSSI **may** be included if available.
             console.log(device.id);
         })
     }, failure);
+   
+## scan
+
+Scan nearest devices
+
+    bluetoothSerial.scan({params}, success, failure);
     
+### Description
+
+#### Android
+
+Function `scan` scans the nearest Bluetooth devices.  The success callback is called with a list of objects.
+
+Example list passed to success callback.  See [BluetoothDevice](http://developer.android.com/reference/android/bluetooth/BluetoothDevice.html#getName\(\)) and [BluetoothClass#getDeviceClass](http://developer.android.com/reference/android/bluetooth/BluetoothClass.html#getDeviceClass\(\)).
+
+    [{
+        "class": 276,
+        "id": "10:BF:48:CB:00:00",        
+        "address": "10:BF:48:CB:00:00",
+        "name": "Nexus 7",
+	"rssi": "-81"  
+    }, {
+        "class": 7936,
+        "id": "00:06:66:4D:00:00",        
+        "address": "00:06:66:4D:00:00",
+        "name": "RN42",
+	"rssi": "-81"
+    }]
+        
+### Parameters
+
+- __success__: Success callback function that is invoked with a list of bonded devices.
+- __delay__: Integer which is specifying the duration of the scan.
+- __failure__: Error callback function, invoked when error occurs. [optional]
+
+### Quick Example
+
+    bluetoothSerial.scan({delay:10000}, function(devices) {
+        devices.forEach(function(device) {
+            console.log(device.id);
+        })
+    }, failure);
+
 ## isConnected
 
 Reports the connection status. 
