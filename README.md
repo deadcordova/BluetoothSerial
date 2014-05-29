@@ -2,7 +2,7 @@
 
 This plugin enables serial communication over Bluetooth. It was written for communicating between Android or with an Arduino (HC-06 Bluetooth Shield).
 
-Android uses Classic Bluetooth. 
+Android uses Classic Bluetooth. IOS will be supported soon.
 
 ## Supported Platforms
 
