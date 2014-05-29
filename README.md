@@ -2,12 +2,11 @@
 
 This plugin enables serial communication over Bluetooth. It was written for communicating between Android or with an Arduino (HC-06 Bluetooth Shield).
 
-Android uses Classic Bluetooth.  #iOS uses Bluetooth Low Energy.
+Android uses Classic Bluetooth. 
 
 ## Supported Platforms
 
 * Android
-#* iOS with [BLEMini](http://redbearlab.com/blemini), [BLEShield](http://redbearlab.com/bleshield/) or [Adafruit Bluefruit LE](http://www.adafruit.com/products/1697)
  
 [Supporting other Bluetooth Low Energy hardware](#supporting-other-ble-hardware)
 
@@ -15,7 +14,6 @@ Android uses Classic Bluetooth.  #iOS uses Bluetooth Low Energy.
 
  * The phone must initiate the Bluetooth connection
  * Data sent over the connection is assumed to be Strings
- #* iOS Bluetooth Low Energy requires iPhone 4S, iPhone5, iPod 5, or iPad3+
 
 # Installing 
 
