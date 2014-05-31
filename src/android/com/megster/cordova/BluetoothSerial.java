@@ -207,7 +207,7 @@ public class BluetoothSerial extends CordovaPlugin {
     }
 
     private void scan(CordovaArgs args, final CallbackContext callbackContext) throws JSONException {
-        if (bluetoothAdapter.getScanMode() == bluetoothAdapter.STATE_ON) {
+        /*if (bluetoothAdapter.getScanMode() == bluetoothAdapter.STATE_ON) {*/
             Handler btHandler = new Handler();
 
             final JSONArray deviceList = new JSONArray();
@@ -257,7 +257,9 @@ public class BluetoothSerial extends CordovaPlugin {
                 }
             }, 10000);
             bluetoothAdapter.startLeScan(leScanCallback);
-        }
+       /* } else {
+            callbackContext.error("Adapter busy");
+        }*/
     }
 
     private void connect(CordovaArgs args, boolean secure, CallbackContext callbackContext) throws JSONException {
