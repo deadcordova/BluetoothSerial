@@ -19,7 +19,7 @@ module.exports = {
         cordova.exec(success, failure, "BluetoothSerial", "list", []);
     },
     //scan nearest devices
-    scan: function(success, failure) {
+    scan: function(time, success, failure) {
         cordova.exec(success, failure, "BluetoothSerial", "scan", [time]);
     },
 

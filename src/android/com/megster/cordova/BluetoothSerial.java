@@ -2,6 +2,8 @@ package com.megster.cordova;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -207,7 +209,27 @@ public class BluetoothSerial extends CordovaPlugin {
     private void scan(CordovaArgs args, final CallbackContext callbackContext) throws JSONException {
         if (bluetoothAdapter.getScanMode() == bluetoothAdapter.STATE_ON) {
             Handler btHandler = new Handler();
+
             final JSONArray deviceList = new JSONArray();
+
+            /*final BroadcastReceiver receiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+                    if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                        try {
+                            JSONObject json = new JSONObject();
+                            json.put("name", intent.getStringExtra(BluetoothDevice.EXTRA_NAME));
+                            json.put("rssi", intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE));
+                            json.put("uuid", intent.getStringExtra(BluetoothDevice.EXTRA_UUID));
+                            deviceList.put(json);
+                        } catch (JSONException e) {
+                            callbackContext.error(e.getMessage());
+                        }
+                    }
+                }
+            };*/
+
             final BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
                 @Override
                 public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] bytes) {
@@ -233,7 +255,7 @@ public class BluetoothSerial extends CordovaPlugin {
                     bluetoothAdapter.stopLeScan(leScanCallback);
                     callbackContext.success(deviceList);
                 }
-            }, Integer.parseInt(args.getString(0)));
+            }, 10000);
             bluetoothAdapter.startLeScan(leScanCallback);
         }
     }
