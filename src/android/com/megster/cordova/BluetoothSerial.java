@@ -20,12 +20,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.Override;
+import java.lang.Runnable;
 import java.util.Set;
 
 /**
  * PhoneGap Plugin for Serial Communication over Bluetooth
  */
 public class BluetoothSerial extends CordovaPlugin {
+    //constant
+    private static final int REQUEST_ENABLE_BT = 1;
 
     // actions
     private static final String LIST = "list";
@@ -43,6 +47,29 @@ public class BluetoothSerial extends CordovaPlugin {
     private static final String IS_CONNECTED = "isConnected";
     private static final String IS_SCANNING = "isScanning";
     private static final String CLEAR = "clear";
+
+    //connection filter and device list
+    private IntentFilter filter;
+    private final JSONArray scanDeviceList = new JSONArray();
+
+    private final BroadcastReceiver btReceiver = new BroadcastReceiver() {
+        String endSignal = BluetoothAdapter.ACTION_DISCOVERY_FINISHED;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                JSONObject tmp = new JSONObject();
+                tmp.put("name", device.getName());
+                tmp.put("address", device.getAddress());
+                tmp.put("rssi", intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE));
+                scanDeviceList.put(tmp);
+            }
+            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                dataAvailableCallback.success(scanDeviceList);
+            }
+        }
+    };
 
     // callbacks
     private CallbackContext connectCallback;
@@ -81,6 +108,9 @@ public class BluetoothSerial extends CordovaPlugin {
         if (bluetoothSerialService == null) {
             bluetoothSerialService = new BluetoothSerialService(mHandler);
         }
+
+        filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(btReceiver, filter);
 
         boolean validAction = true;
         
@@ -192,7 +222,7 @@ public class BluetoothSerial extends CordovaPlugin {
         JSONArray deviceList = new JSONArray();
         Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : bondedDevices) {
-            Intent intent = new Intent(device.ACTION_FOUND);
+            //Intent intent = new Intent(device.ACTION_FOUND);
             JSONObject json = new JSONObject();
             json.put("name", device.getName());
             json.put("address", device.getAddress());
@@ -200,41 +230,21 @@ public class BluetoothSerial extends CordovaPlugin {
             if (device.getBluetoothClass() != null) {
                 json.put("class", device.getBluetoothClass().getDeviceClass());
             }
-            json.put("rssi", intent.getShortExtra(device.EXTRA_RSSI, Short.MIN_VALUE));
+            json.put("rssi", device.EXTRA_RSSI);
             deviceList.put(json);
         }
         callbackContext.success(deviceList);
     }
 
-    private void scan(CordovaArgs args, final CallbackContext callbackContext) throws JSONException {
-        /*if (bluetoothAdapter.getScanMode() == bluetoothAdapter.STATE_ON) {*/
-            Handler btHandler = new Handler();
-
-            final JSONArray deviceList = new JSONArray();
-
-            /*final BroadcastReceiver receiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    String action = intent.getAction();
-                    if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                        try {
-                            JSONObject json = new JSONObject();
-                            json.put("name", intent.getStringExtra(BluetoothDevice.EXTRA_NAME));
-                            json.put("rssi", intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE));
-                            json.put("uuid", intent.getStringExtra(BluetoothDevice.EXTRA_UUID));
-                            deviceList.put(json);
-                        } catch (JSONException e) {
-                            callbackContext.error(e.getMessage());
-                        }
-                    }
-                }
-            };*/
-
+    private void scan(CordovaArgs args, CallbackContext callbackContext) throws JSONException {
+        if (bluetoothAdapter.isEnabled() && !bluetoothAdapter.isDiscovering()) {
+            bluetoothAdapter.startDiscovery();
+            dataAvailableCallback = callbackContext;
+            /*final Handler scanHandler = new Handler();
             final BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
                 @Override
                 public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] bytes) {
                     try {
-
                         JSONObject json = new JSONObject();
                         json.put("name", bluetoothDevice.getName());
                         json.put("address", bluetoothDevice.getAddress());
@@ -244,22 +254,33 @@ public class BluetoothSerial extends CordovaPlugin {
                         }
                         json.put("rssi", rssi);
                         deviceList.put(json);
+                        callbackContext.success(deviceList);
                     } catch (JSONException e) {
                         callbackContext.error(e.getMessage());
                     }
                 }
             };
-            btHandler.postDelayed(new Runnable() {
+
+            final Runnable startScan = new Runnable() {
+                @Override
+                public void run() {
+                    bluetoothAdapter.startLeScan(leScanCallback);
+                    scanHandler.postDelayed(stopScan, 5000);
+                }
+            };
+            final Runnable stopScan = new Runnable() {
                 @Override
                 public void run() {
                     bluetoothAdapter.stopLeScan(leScanCallback);
-                    callbackContext.success(deviceList);
+                    scanHandler.postDelayed(startScan, 10000);
                 }
-            }, 10000);
-            bluetoothAdapter.startLeScan(leScanCallback);
-       /* } else {
-            callbackContext.error("Adapter busy");
-        }*/
+            };
+            startScan.run();*/
+        } else {
+            Intent enableBt = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBt, REQUEST_ENABLE_BT);
+            callbackContext.error("Turn on your bluetooth device please");
+        }
     }
 
     private void connect(CordovaArgs args, boolean secure, CallbackContext callbackContext) throws JSONException {
