@@ -1,0 +1,15 @@
+{
+  "name": "com.jacktheripper.cordova.bluetoothserial",
+  "version": "0.3.0",
+  "description": "NA",
+  "cordova": {
+    "id": "com.jacktheripper.cordova.bluetoothserial",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deadcordova/BluetoothSerial"
+  }
+}
